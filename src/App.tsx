@@ -31,6 +31,7 @@ function App() {
   const [step, setStep] = useState<Step>('input')
   const [activeScenario, setActiveScenario] = useState(0)
   const [showSummary, setShowSummary] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const canSubmit =
     !isExtracting &&
@@ -38,12 +39,14 @@ function App() {
 
   async function handleSubmit() {
     setIsExtracting(true)
+    setError(null)
     try {
       const result = await analyzeStartup(textInput, pdfFile, imageFiles)
       setProfile(result)
       setStep('profile')
     } catch (err) {
       console.error('Autopsy failed:', err)
+      setError(err instanceof Error ? err.message : 'Failed to analyze startup. Please try again.')
     } finally {
       setIsExtracting(false)
     }
@@ -105,6 +108,11 @@ function App() {
             <TextInput value={textInput} onChange={setTextInput} />
             <PdfUpload onChange={setPdfFile} />
             <ImageUpload onChange={setImageFiles} />
+            {error && (
+              <div className="rounded-lg bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
+                {error}
+              </div>
+            )}
             <button
               type="button"
               onClick={handleSubmit}

@@ -2,18 +2,16 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import cors from 'cors'
 import multer from 'multer'
 import crypto from 'node:crypto'
-import { GoogleGenerativeAI, type Part } from '@google/generative-ai'
+import { VertexAI, type Part } from '@google-cloud/vertexai'
 import { logger } from './logger.js'
 import { metrics } from './metrics.js'
 
 const app = express()
 const PORT = process.env.PORT ?? '8080'
 
-const apiKey = process.env.GEMINI_API_KEY ?? ''
-if (!apiKey) {
-  logger.warn('GEMINI_API_KEY is not set — AI endpoints will fail')
-}
-const genAI = new GoogleGenerativeAI(apiKey)
+const VERTEX_PROJECT = process.env.VERTEX_PROJECT ?? 'gen-lang-client-0879782082'
+const VERTEX_LOCATION = process.env.VERTEX_LOCATION ?? 'us-central1'
+const genAI = new VertexAI({ project: VERTEX_PROJECT, location: VERTEX_LOCATION })
 
 const upload = multer({ storage: multer.memoryStorage() })
 
@@ -55,6 +53,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getReqId(req: Request): string {
   return (req as Request & { reqId: string }).reqId ?? '?'
+}
+
+function isQuotaError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err)
+  return msg.includes('429') || msg.toLowerCase().includes('quota') || msg.includes('Too Many Requests')
+}
+
+function sendError(res: Response, err: unknown, fallbackMessage: string) {
+  if (isQuotaError(err)) {
+    res.status(429).json({ error: 'Gemini API quota exceeded. Please upgrade your plan at https://ai.google.dev or try again later.' })
+  } else {
+    res.status(500).json({ error: fallbackMessage })
+  }
 }
 
 async function callGemini<T>(
@@ -158,7 +169,7 @@ app.post('/api/assumptions', async (req, res) => {
       reqId,
       error: err instanceof Error ? err.message : String(err),
     })
-    res.status(500).json({ error: 'Failed to extract assumptions' })
+    sendError(res, err, 'Failed to extract assumptions')
   }
 })
 
@@ -204,7 +215,7 @@ app.post('/api/scenarios', async (req, res) => {
       reqId,
       error: err instanceof Error ? err.message : String(err),
     })
-    res.status(500).json({ error: 'Failed to generate failure scenarios' })
+    sendError(res, err, 'Failed to generate failure scenarios')
   }
 })
 
@@ -251,7 +262,7 @@ app.post(
         reqId,
         error: err instanceof Error ? err.message : String(err),
       })
-      res.status(500).json({ error: 'Failed to analyze startup profile' })
+      sendError(res, err, 'Failed to analyze startup profile')
     }
   }
 )
