@@ -4,14 +4,19 @@ import multer from 'multer'
 import { GoogleGenerativeAI, type Part } from '@google/generative-ai'
 
 const app = express()
-const PORT = 3001
+const PORT = process.env.PORT ?? '8080'
 
 const apiKey = process.env.GEMINI_API_KEY ?? ''
 const genAI = new GoogleGenerativeAI(apiKey)
 
 const upload = multer({ storage: multer.memoryStorage() })
 
-app.use(cors({ origin: 'http://localhost:5173' }))
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  process.env.DEPLOYED_ORIGIN,
+].filter(Boolean) as string[]
+
+app.use(cors({ origin: ALLOWED_ORIGINS }))
 app.use(express.json())
 
 const ASSUMPTIONS_SYSTEM_PROMPT =
@@ -257,6 +262,12 @@ app.post('/api/scenario-media', async (req, res) => {
     console.error('/api/scenario-media error:', err)
     res.status(500).json({ error: 'Failed to generate scenario media' })
   }
+})
+
+app.use(express.static('dist'))
+
+app.get('/{*path}', (_req, res) => {
+  res.sendFile('index.html', { root: 'dist' })
 })
 
 app.listen(PORT, () => {

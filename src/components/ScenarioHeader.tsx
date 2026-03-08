@@ -47,9 +47,9 @@ export default function ScenarioHeader({ scenario, imageUrl }: Props) {
         {/* gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/60 to-gray-900" />
         {/* text content */}
-        <div className="absolute bottom-0 left-0 right-0 px-6 pb-5 pt-12">
+        <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-6 pb-4 sm:pb-5 pt-8 sm:pt-12">
           {badges}
-          <h2 className="mt-2 text-2xl font-bold text-white leading-snug">
+          <h2 className="mt-2 text-xl sm:text-2xl font-bold text-white leading-snug">
             {scenario.title}
           </h2>
         </div>
@@ -58,9 +58,9 @@ export default function ScenarioHeader({ scenario, imageUrl }: Props) {
   }
 
   return (
-    <div className="bg-gray-800 px-6 py-5">
+    <div className="bg-gray-800 px-4 sm:px-6 py-5">
       {badges}
-      <h2 className="mt-2 text-2xl font-bold text-white leading-snug">
+      <h2 className="mt-2 text-xl sm:text-2xl font-bold text-white leading-snug">
         {scenario.title}
       </h2>
     </div>

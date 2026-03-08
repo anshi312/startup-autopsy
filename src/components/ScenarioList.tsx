@@ -60,7 +60,7 @@ function ScenarioCard({ scenario, index, image, narration }: { scenario: Failure
             src={image}
             alt={scenario.title}
             onLoad={() => setImgLoaded(true)}
-            className={`w-full h-56 object-cover transition-opacity duration-700 ease-in ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`w-full h-40 sm:h-56 object-cover transition-opacity duration-700 ease-in ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
           {/* gradient overlay: transparent → gray-800 */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-800/50 to-gray-800" />
@@ -139,7 +139,7 @@ function ScenarioCard({ scenario, index, image, narration }: { scenario: Failure
         </blockquote>
 
         {/* Pivot & Validation */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="rounded-lg bg-gray-700/50 border border-gray-600/50 px-4 py-3">
             <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Pivot Suggestion</h4>
             <p className="text-sm text-gray-200 leading-relaxed">{scenario.pivotSuggestion}</p>

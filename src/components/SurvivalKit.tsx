@@ -10,7 +10,7 @@ export default function SurvivalKit({ scenario }: Props) {
       <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
         Survival Kit
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-gray-800 border-l-4 border-green-500 pl-4 pr-4 py-4 rounded-r-lg">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-lg leading-none">📋</span>
