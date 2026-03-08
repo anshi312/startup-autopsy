@@ -68,6 +68,12 @@ function sendError(res: Response, err: unknown, fallbackMessage: string) {
   }
 }
 
+// @google-cloud/vertexai responses don't have a .text() helper —
+// extract text by joining all text parts from the first candidate.
+function responseText(response: { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }): string {
+  return response.candidates?.[0]?.content?.parts?.map(p => p.text ?? '').join('') ?? ''
+}
+
 async function callGemini<T>(
   reqId: string,
   label: string,
@@ -159,7 +165,7 @@ app.post('/api/assumptions', async (req, res) => {
       })
     )
 
-    const raw = result.response.text()
+    const raw = responseText(result.response)
     const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
     const assumptions = JSON.parse(cleaned)
     logger.info('assumptions:success', { reqId, count: Array.isArray(assumptions) ? assumptions.length : null })
@@ -198,7 +204,7 @@ app.post('/api/scenarios', async (req, res) => {
       })
     )
 
-    const raw = result.response.text()
+    const raw = responseText(result.response)
     const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
     const parsed = JSON.parse(cleaned)
 
@@ -252,7 +258,7 @@ app.post(
         })
       )
 
-      const raw = result.response.text()
+      const raw = responseText(result.response)
       const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
       const profile = JSON.parse(cleaned)
       logger.info('analyze:success', { reqId, startupName: profile?.name })
@@ -318,7 +324,7 @@ async function serverGenerateNarration(scenario: FailureScenario, reqId: string)
     const textPrompt = `Write a 4-5 sentence documentary narrator voiceover script for this startup failure scenario. Title: ${scenario.title}. Root cause: ${scenario.rootCause}. Timeline summary: ${scenario.timeline.map(t => t.headline).join(' → ')}. Use a serious, reflective tone like a Netflix documentary narrator. Speak in second person to the founder. Keep it under 80 words. Return only the narration text, no formatting.`
     const textModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     const textResult = await callGemini(reqId, 'scenario-narration-text', () => textModel.generateContent(textPrompt))
-    const narrationText = textResult.response.text()
+    const narrationText = responseText(textResult.response)
 
     return { audioBase64, narrationText }
   } catch {
