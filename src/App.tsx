@@ -4,11 +4,13 @@ import PdfUpload from './components/PdfUpload'
 import ImageUpload from './components/ImageUpload'
 import ProfileCard from './components/ProfileCard'
 import AssumptionList from './components/AssumptionList'
-import ScenarioList from './components/ScenarioList'
-import { extractStartupProfile } from './services/extractProfile'
-import { extractAssumptions } from './services/extractAssumptions'
-import { generateFailureScenarios } from './services/generateScenarios'
+import ScenarioTabs from './components/ScenarioTabs'
+import ScenarioView from './components/ScenarioView'
+import SummaryView from './components/SummaryView'
+import { analyzeStartup, getAssumptions, getScenarios, getScenarioMedia } from './services/api'
 import type { StartupProfile, Assumption, FailureScenario } from './types'
+
+type NarrationResult = { audioBase64: string; narrationText: string } | null
 
 type Step = 'input' | 'profile' | 'assumptions' | 'results'
 
@@ -19,10 +21,16 @@ function App() {
   const [profile, setProfile] = useState<StartupProfile | null>(null)
   const [assumptions, setAssumptions] = useState<Assumption[]>([])
   const [scenarios, setScenarios] = useState<FailureScenario[]>([])
+  const [scenarioImages, setScenarioImages] = useState<(string | null)[]>([])
+  const [scenarioNarrations, setScenarioNarrations] = useState<NarrationResult[]>([])
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false)
+  const [isGeneratingNarrations, setIsGeneratingNarrations] = useState(false)
   const [isExtracting, setIsExtracting] = useState(false)
   const [isExtractingAssumptions, setIsExtractingAssumptions] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [step, setStep] = useState<Step>('input')
+  const [activeScenario, setActiveScenario] = useState(0)
+  const [showSummary, setShowSummary] = useState(false)
 
   const canSubmit =
     !isExtracting &&
@@ -31,7 +39,7 @@ function App() {
   async function handleSubmit() {
     setIsExtracting(true)
     try {
-      const result = await extractStartupProfile(textInput, pdfFile, imageFiles)
+      const result = await analyzeStartup(textInput, pdfFile, imageFiles)
       setProfile(result)
       setStep('profile')
     } catch (err) {
@@ -45,7 +53,7 @@ function App() {
     if (!profile) return
     setIsExtractingAssumptions(true)
     try {
-      const result = await extractAssumptions(profile)
+      const result = await getAssumptions(profile)
       setAssumptions(result)
       setStep('assumptions')
     } catch (err) {
@@ -60,14 +68,26 @@ function App() {
     if (!profile) return
     setIsGenerating(true)
     try {
-      const result = await generateFailureScenarios(profile, assumptions)
+      const result = await getScenarios(profile, assumptions)
       setScenarios(result)
       setStep('results')
+      setIsGenerating(false)
+
+      setIsGeneratingImages(true)
+      setIsGeneratingNarrations(true)
+      const mediaResults = await Promise.allSettled(result.map(s => getScenarioMedia(s)))
+      const media = mediaResults.map(r => r.status === 'fulfilled' ? r.value : { image: null, narration: null })
+      setScenarioImages(media.map(m => m.image))
+      setScenarioNarrations(media.map(m => m.narration))
+      setIsGeneratingImages(false)
+      setIsGeneratingNarrations(false)
     } catch (err) {
       console.error('Scenario generation failed:', err)
       alert('Failed to generate failure scenarios. Please try again.')
     } finally {
       setIsGenerating(false)
+      setIsGeneratingImages(false)
+      setIsGeneratingNarrations(false)
     }
   }
 
@@ -147,8 +167,42 @@ function App() {
           </div>
         )}
 
-        {step === 'results' && (
-          <ScenarioList scenarios={scenarios} />
+        {step === 'results' && scenarios.length > 0 && (
+          <div className="w-full max-w-4xl flex flex-col gap-4">
+            {(isGeneratingImages || isGeneratingNarrations) && (
+              <p className="text-center text-gray-400 text-sm animate-pulse">
+                Generating documentary visuals...
+              </p>
+            )}
+            {showSummary ? (
+              <SummaryView
+                scenarios={scenarios}
+                onBack={() => setShowSummary(false)}
+              />
+            ) : (
+              <>
+                <div className="bg-gray-800 rounded-xl overflow-hidden">
+                  <ScenarioTabs
+                    scenarios={scenarios}
+                    activeIndex={activeScenario}
+                    onSelect={setActiveScenario}
+                  />
+                  <ScenarioView
+                    scenario={scenarios[activeScenario]}
+                    imageUrl={scenarioImages[activeScenario]}
+                    narration={scenarioNarrations[activeScenario]}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSummary(true)}
+                  className="w-full py-3 rounded-lg font-bold text-sm bg-gray-700 hover:bg-gray-600 text-white transition-colors cursor-pointer"
+                >
+                  View Full Action Plan →
+                </button>
+              </>
+            )}
+          </div>
         )}
       </main>
     </div>

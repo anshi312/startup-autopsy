@@ -5,7 +5,8 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(cmd /c \"where npm\")",
       "Bash(npm run build)",
-      "Bash(npm install @google/generative-ai)"
+      "Bash(npm install @google/generative-ai)",
+      "Bash(npm install --save-dev express cors multer @types/express @types/cors @types/multer)"
     ]
   }
 }
