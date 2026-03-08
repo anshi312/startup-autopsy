@@ -14,12 +14,12 @@ interface Props {
 
 export default function ScenarioTabs({ scenarios, activeIndex, onSelect }: Props) {
   return (
-    <div className="flex border-b border-gray-700 bg-gray-900">
+    <div className="flex overflow-x-auto border-b border-gray-700 bg-gray-900 scrollbar-none">
       {scenarios.map((scenario, i) => {
         const isActive = i === activeIndex
         const label =
-          scenario.title.length > 40
-            ? scenario.title.slice(0, 40) + '…'
+          scenario.title.length > 30
+            ? scenario.title.slice(0, 30) + '…'
             : scenario.title
 
         return (
@@ -27,7 +27,7 @@ export default function ScenarioTabs({ scenarios, activeIndex, onSelect }: Props
             key={i}
             type="button"
             onClick={() => onSelect(i)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm transition-colors flex-1 min-w-0
+            className={`flex items-center gap-2 px-4 py-3 text-sm transition-colors shrink-0 min-w-[120px]
               ${isActive
                 ? 'border-b-2 border-red-500 font-bold text-white'
                 : 'border-b-2 border-transparent text-gray-400 hover:text-gray-200'

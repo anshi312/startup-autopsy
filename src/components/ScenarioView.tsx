@@ -19,7 +19,7 @@ export default function ScenarioView({ scenario, imageUrl, narration }: Props) {
     <div className="flex flex-col">
       <ScenarioHeader scenario={scenario} imageUrl={imageUrl} />
 
-      <div className="flex flex-col gap-6 px-6 py-6">
+      <div className="flex flex-col gap-6 px-4 sm:px-6 py-6">
         {narration && (
           <NarrationPlayer
             audioUrl={narration.audioBase64}
