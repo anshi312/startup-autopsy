@@ -96,12 +96,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#F9F8F5] text-zinc-900 flex flex-col">
-      <nav className="bg-white border-b border-zinc-200 px-6 py-4 flex items-center gap-3">
-        <div className="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center shrink-0">
-          <svg viewBox="0 0 16 16" fill="white" className="w-3.5 h-3.5">
-            <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 3.75a.75.75 0 00-1.5 0v4l2.5 1.5a.75.75 0 00.75-1.3L8.75 7.6V4.75z"/>
-          </svg>
-        </div>
+      <nav className="bg-white border-b border-zinc-200 px-6 py-4 flex items-center">
         <h1 className="font-serif text-xl tracking-tight text-zinc-900">
           Startup Autopsy
         </h1>
