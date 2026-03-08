@@ -1,0 +1,133 @@
+# =========================
+
+# OS FILES
+
+# =========================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+
+# ENVIRONMENT VARIABLES
+
+# =========================
+
+.env
+.env.*
+*.env
+
+# =========================
+
+# NODE / REACT
+
+# =========================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# React build outputs
+
+build/
+dist/
+.next/
+out/
+coverage/
+
+# Vite
+
+.vite/
+
+# =========================
+
+# PYTHON
+
+# =========================
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Python environments
+
+venv/
+env/
+ENV/
+.venv/
+
+# Python packaging
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Python testing
+
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Python notebooks
+
+.ipynb_checkpoints/
+
+# =========================
+
+# LOG FILES
+
+# =========================
+
+logs/
+*.log
+
+# =========================
+
+# DATA / MODELS (optional)
+
+# =========================
+
+data/
+datasets/
+models/
+*.pt
+*.pth
+*.h5
+*.ckpt
+
+# =========================
+
+# IDE / EDITORS
+
+# =========================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+
+# DOCKER
+
+# =========================
+
+.dockerignore
+docker-compose.override.yml
+
+# =========================
+
+# MISC
+
+# =========================
+
+tmp/
+temp/
+.cache/
+*.bak
+*.orig
