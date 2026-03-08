@@ -1,17 +1,20 @@
+// Load .env if present (local development — Node 20.12+ built-in)
+try { (process as never as { loadEnvFile(p: string): void }).loadEnvFile('.env') } catch { /* no .env, fine */ }
+
 import express, { type Request, type Response, type NextFunction } from 'express'
 import cors from 'cors'
 import multer from 'multer'
 import crypto from 'node:crypto'
-import { VertexAI, type Part } from '@google-cloud/vertexai'
+import { GoogleGenerativeAI, type Part } from '@google/generative-ai'
 import { logger } from './logger.js'
 import { metrics } from './metrics.js'
 
 const app = express()
 const PORT = process.env.PORT ?? '8080'
 
-const VERTEX_PROJECT = process.env.VERTEX_PROJECT ?? 'gen-lang-client-0879782082'
-const VERTEX_LOCATION = process.env.VERTEX_LOCATION ?? 'us-central1'
-const genAI = new VertexAI({ project: VERTEX_PROJECT, location: VERTEX_LOCATION })
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? ''
+if (!GEMINI_API_KEY) logger.warn('server:no-api-key', { hint: 'Set GEMINI_API_KEY env var' })
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
 
 const upload = multer({ storage: multer.memoryStorage() })
 
@@ -68,10 +71,8 @@ function sendError(res: Response, err: unknown, fallbackMessage: string) {
   }
 }
 
-// @google-cloud/vertexai responses don't have a .text() helper —
-// extract text by joining all text parts from the first candidate.
-function responseText(response: { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }): string {
-  return response.candidates?.[0]?.content?.parts?.map(p => p.text ?? '').join('') ?? ''
+function responseText(response: { text(): string }): string {
+  return response.text()
 }
 
 async function callGemini<T>(
@@ -298,6 +299,31 @@ async function serverGenerateImage(scenario: FailureScenario, reqId: string): Pr
   }
 }
 
+function pcmToWav(pcmBase64: string, mimeType: string): string {
+  const rateMatch = mimeType.match(/rate=(\d+)/i)
+  const sampleRate = rateMatch ? parseInt(rateMatch[1]) : 24000
+  const numChannels = 1
+  const bitsPerSample = 16
+  const pcmBuffer = Buffer.from(pcmBase64, 'base64')
+  const pcmLength = pcmBuffer.length
+  const wavBuffer = Buffer.alloc(44 + pcmLength)
+  wavBuffer.write('RIFF', 0, 'ascii')
+  wavBuffer.writeUInt32LE(36 + pcmLength, 4)
+  wavBuffer.write('WAVE', 8, 'ascii')
+  wavBuffer.write('fmt ', 12, 'ascii')
+  wavBuffer.writeUInt32LE(16, 16)
+  wavBuffer.writeUInt16LE(1, 20)
+  wavBuffer.writeUInt16LE(numChannels, 22)
+  wavBuffer.writeUInt32LE(sampleRate, 24)
+  wavBuffer.writeUInt32LE(sampleRate * numChannels * bitsPerSample / 8, 28)
+  wavBuffer.writeUInt16LE(numChannels * bitsPerSample / 8, 32)
+  wavBuffer.writeUInt16LE(bitsPerSample, 34)
+  wavBuffer.write('data', 36, 'ascii')
+  wavBuffer.writeUInt32LE(pcmLength, 40)
+  pcmBuffer.copy(wavBuffer, 44)
+  return `data:audio/wav;base64,${wavBuffer.toString('base64')}`
+}
+
 async function serverGenerateNarration(scenario: FailureScenario, reqId: string): Promise<{ audioBase64: string; narrationText: string } | null> {
   try {
     const ttsPrompt = `Narrate the following startup failure scenario in a serious, reflective documentary tone like a Netflix narrator. Speak in second person to the founder. Keep it under 80 words.\n\nTitle: ${scenario.title}\nRoot cause: ${scenario.rootCause}\nTimeline: ${scenario.timeline.map(t => t.headline).join(' → ')}`
@@ -314,7 +340,15 @@ async function serverGenerateNarration(scenario: FailureScenario, reqId: string)
     let audioBase64: string | null = null
     for (const part of ttsResult.response.candidates?.[0]?.content?.parts ?? []) {
       const p = part as { inlineData?: { mimeType: string; data: string } }
-      if (p.inlineData) { audioBase64 = `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`; break }
+      if (p.inlineData) {
+        const { mimeType, data } = p.inlineData
+        if (mimeType.startsWith('audio/L16') || mimeType.startsWith('audio/pcm')) {
+          audioBase64 = pcmToWav(data, mimeType)
+        } else {
+          audioBase64 = `data:${mimeType};base64,${data}`
+        }
+        break
+      }
     }
     if (!audioBase64) {
       logger.warn('scenario-tts:no-audio-part', { reqId })

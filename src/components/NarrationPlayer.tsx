@@ -28,10 +28,10 @@ export default function NarrationPlayer({ audioUrl, narrationText }: NarrationPl
     if (!audio) return
     if (playing) {
       audio.pause()
+      setPlaying(false)
     } else {
-      audio.play()
+      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false))
     }
-    setPlaying(!playing)
   }
 
   function handleTimeUpdate() {
