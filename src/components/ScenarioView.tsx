@@ -33,13 +33,13 @@ export default function ScenarioView({ scenario, imageUrl, narration }: Props) {
 
         <PullQuote quote={scenario.quote} />
 
-        <div className="bg-gray-800 rounded-lg px-5 py-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+        <div className="bg-zinc-50 border border-zinc-200 rounded-lg px-5 py-4">
+          <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-2">
             Risk Explanation
           </h3>
-          <p className="text-sm text-gray-300 leading-relaxed">
+          <p className="text-sm text-zinc-600 leading-relaxed">
             This scenario is driven by the breakdown of the{' '}
-            <span className="text-white font-semibold">{scenario.failureType}</span>{' '}
+            <span className="text-zinc-900 font-semibold">{scenario.failureType}</span>{' '}
             assumption: {scenario.rootCause}
           </p>
         </div>

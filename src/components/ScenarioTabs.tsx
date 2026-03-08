@@ -14,7 +14,7 @@ interface Props {
 
 export default function ScenarioTabs({ scenarios, activeIndex, onSelect }: Props) {
   return (
-    <div className="flex overflow-x-auto border-b border-gray-700 bg-gray-900 scrollbar-none">
+    <div className="flex overflow-x-auto border-b border-zinc-200 bg-[#F9F8F5] scrollbar-none">
       {scenarios.map((scenario, i) => {
         const isActive = i === activeIndex
         const label =
@@ -29,8 +29,8 @@ export default function ScenarioTabs({ scenarios, activeIndex, onSelect }: Props
             onClick={() => onSelect(i)}
             className={`flex items-center gap-2 px-4 py-3 text-sm transition-colors shrink-0 min-w-[120px]
               ${isActive
-                ? 'border-b-2 border-red-500 font-bold text-white'
-                : 'border-b-2 border-transparent text-gray-400 hover:text-gray-200'
+                ? 'border-b-2 border-red-600 font-semibold text-zinc-900 bg-white'
+                : 'border-b-2 border-transparent text-zinc-500 hover:text-zinc-700'
               }`}
           >
             <span

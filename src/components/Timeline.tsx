@@ -29,7 +29,7 @@ export default function Timeline({ timeline }: Props) {
   return (
     <div className="relative pl-8">
       {/* vertical spine */}
-      <div className="absolute left-3 top-2 bottom-2 w-px bg-gray-700" />
+      <div className="absolute left-3 top-2 bottom-2 w-px bg-zinc-200" />
 
       <div className="flex flex-col gap-8">
         {timeline.map((event, i) => {
@@ -41,19 +41,19 @@ export default function Timeline({ timeline }: Props) {
             <div key={i} className="relative">
               {/* dot on the spine */}
               <span
-                className={`absolute -left-[1.35rem] top-1.5 w-3 h-3 rounded-full ring-2 ring-gray-900 ${dotColor} ${isLast ? 'w-4 h-4 -left-6 top-1' : ''}`}
+                className={`absolute -left-[1.35rem] top-1.5 w-3 h-3 rounded-full ring-2 ring-white ${dotColor} ${isLast ? 'w-4 h-4 -left-6 top-1' : ''}`}
               />
 
               <div
                 className={`border-l-2 pl-4 ${borderColor} ${isLast ? 'pb-1' : ''}`}
               >
-                <p className={`text-xs font-medium uppercase tracking-widest mb-1 ${isLast ? 'text-red-400' : 'text-gray-500'}`}>
+                <p className={`text-xs font-medium uppercase tracking-widest mb-1 ${isLast ? 'text-red-600' : 'text-zinc-400'}`}>
                   Month {event.month}
                 </p>
-                <p className={`font-bold text-white leading-snug ${isLast ? 'text-xl' : 'text-base'}`}>
+                <p className={`font-semibold text-zinc-900 leading-snug ${isLast ? 'text-xl' : 'text-base'}`}>
                   {event.headline}
                 </p>
-                <p className={`mt-1 leading-relaxed ${isLast ? 'text-gray-300 text-sm' : 'text-gray-400 text-sm'}`}>
+                <p className={`mt-1 leading-relaxed text-sm ${isLast ? 'text-zinc-600' : 'text-zinc-500'}`}>
                   {event.description}
                 </p>
               </div>

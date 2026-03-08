@@ -64,8 +64,8 @@ export default function NarrationPlayer({ audioUrl, narrationText }: NarrationPl
 
   if (!audioUrl) {
     return (
-      <blockquote className="border-l-2 border-gray-600 pl-4">
-        <p className="text-sm text-gray-300 italic leading-relaxed">{narrationText}</p>
+      <blockquote className="border-l-2 border-zinc-300 pl-4">
+        <p className="text-sm text-zinc-500 italic leading-relaxed">{narrationText}</p>
       </blockquote>
     )
   }
@@ -73,7 +73,7 @@ export default function NarrationPlayer({ audioUrl, narrationText }: NarrationPl
   return (
     <div className="flex flex-col gap-3">
       {/* Player bar */}
-      <div className="flex items-center gap-3 bg-gray-900 border border-gray-700 rounded-lg px-4 py-3">
+      <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-lg px-4 py-3 shadow-sm">
         <audio
           ref={audioRef}
           src={audioUrl}
@@ -86,7 +86,7 @@ export default function NarrationPlayer({ audioUrl, narrationText }: NarrationPl
         <button
           type="button"
           onClick={togglePlay}
-          className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-500 transition-colors"
+          className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 transition-colors"
           aria-label={playing ? 'Pause' : 'Play'}
         >
           {playing ? (
@@ -103,7 +103,7 @@ export default function NarrationPlayer({ audioUrl, narrationText }: NarrationPl
 
         {/* Progress bar */}
         <div
-          className="flex-1 h-1.5 bg-gray-700 rounded-full cursor-pointer relative"
+          className="flex-1 h-1.5 bg-zinc-200 rounded-full cursor-pointer relative"
           onClick={handleSeek}
         >
           <div
@@ -113,13 +113,13 @@ export default function NarrationPlayer({ audioUrl, narrationText }: NarrationPl
         </div>
 
         {/* Time */}
-        <span className="shrink-0 text-xs text-gray-400 font-mono tabular-nums">
+        <span className="shrink-0 text-xs text-zinc-400 font-mono tabular-nums">
           {formatTime(currentTime)}{duration > 0 ? ` / ${formatTime(duration)}` : ''}
         </span>
       </div>
 
       {/* Subtitles */}
-      <p className="text-sm text-gray-300 italic leading-relaxed px-1">{narrationText}</p>
+      <p className="text-sm text-zinc-500 italic leading-relaxed px-1">{narrationText}</p>
     </div>
   )
 }
