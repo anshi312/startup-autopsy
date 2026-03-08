@@ -2,10 +2,21 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import cors from 'cors'
 import multer from 'multer'
 import crypto from 'node:crypto'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import { VertexAI, type Part } from '@google-cloud/vertexai'
 import { GoogleAuth } from 'google-auth-library'
 import { logger } from './logger.js'
 import { metrics } from './metrics.js'
+
+// Allow non-GCP deployments (Railway, Fly.io, etc.) to supply credentials
+// via a GOOGLE_APPLICATION_CREDENTIALS_JSON env var containing the key JSON.
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  const tmpKey = path.join(os.tmpdir(), 'gcp-key.json')
+  fs.writeFileSync(tmpKey, process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON, 'utf8')
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpKey
+}
 
 const app = express()
 const PORT = process.env.PORT ?? '8080'
