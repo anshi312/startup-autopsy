@@ -1,10 +1,11 @@
-import { useState } from 'react'
-
 const MAX_CHARS = 2000
 
-export default function TextInput() {
-  const [value, setValue] = useState('')
+interface TextInputProps {
+  value: string
+  onChange: (value: string) => void
+}
 
+export default function TextInput({ value, onChange }: TextInputProps) {
   return (
     <div className="flex flex-col gap-2 w-full">
       <label htmlFor="startup-idea" className="text-sm font-medium text-gray-300">
@@ -13,7 +14,7 @@ export default function TextInput() {
       <textarea
         id="startup-idea"
         value={value}
-        onChange={e => setValue(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         maxLength={MAX_CHARS}
         rows={8}
         placeholder="e.g., We're building a marketplace for freelance chefs to cook in people's homes..."
