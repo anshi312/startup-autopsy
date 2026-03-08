@@ -3,6 +3,7 @@ import cors from 'cors'
 import multer from 'multer'
 import crypto from 'node:crypto'
 import { VertexAI, type Part } from '@google-cloud/vertexai'
+import { GoogleAuth } from 'google-auth-library'
 import { logger } from './logger.js'
 import { metrics } from './metrics.js'
 
@@ -12,6 +13,7 @@ const PORT = process.env.PORT ?? '8080'
 const VERTEX_PROJECT = process.env.VERTEX_PROJECT ?? 'gen-lang-client-0879782082'
 const VERTEX_LOCATION = process.env.VERTEX_LOCATION ?? 'us-central1'
 const genAI = new VertexAI({ project: VERTEX_PROJECT, location: VERTEX_LOCATION })
+const googleAuth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] })
 
 const upload = multer({ storage: multer.memoryStorage() })
 
@@ -281,22 +283,40 @@ type FailureScenario = {
 
 async function serverGenerateImage(scenario: FailureScenario, reqId: string): Promise<string | null> {
   try {
-    const imageModel = genAI.preview.getImageGenerationModel({
-      model: 'imagen-3.0-fast-generate-001',
-    })
-
     const prompt = `Cinematic documentary photograph: ${scenario.title}. ${scenario.rootCause}. Dramatic moody lighting, photojournalistic editorial style, dark atmospheric mood.`
 
-    const result = await callGemini(reqId, 'scenario-image', () =>
-      imageModel.generateImages({
-        prompt,
-        numberOfImages: 1,
-        aspectRatio: '16:9',
-      })
-    )
+    const client = await googleAuth.getClient()
+    const tokenResponse = await client.getAccessToken()
+    const accessToken = tokenResponse.token
 
-    if (result.images && result.images.length > 0 && result.images[0].imageBytes) {
-      return `data:image/png;base64,${result.images[0].imageBytes}`
+    const url = `https://${VERTEX_LOCATION}-aiplatform.googleapis.com/v1/projects/${VERTEX_PROJECT}/locations/${VERTEX_LOCATION}/publishers/google/models/imagen-3.0-fast-generate-001:predict`
+
+    const t = Date.now()
+    logger.info('gemini:start', { reqId, label: 'scenario-image' })
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        instances: [{ prompt }],
+        parameters: { sampleCount: 1, aspectRatio: '16:9' },
+      }),
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(`Imagen API error ${response.status}: ${text}`)
+    }
+
+    const data = await response.json() as { predictions?: Array<{ bytesBase64Encoded?: string }> }
+    logger.info('gemini:ok', { reqId, label: 'scenario-image', durationMs: Date.now() - t })
+
+    const imageBytes = data.predictions?.[0]?.bytesBase64Encoded
+    if (imageBytes) {
+      return `data:image/png;base64,${imageBytes}`
     }
 
     logger.warn('scenario-image:no-image', { reqId })
