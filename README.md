@@ -153,32 +153,19 @@ docker run -it `
 
 ---
 
-- No API Key
+- **No API Key** — Do not use `process.env.GEMINI_API_KEY`. The SDK automatically detects the mounted credentials.
 
-``` Do not use:
-process.env.GEMINI_API_KEY
+- **Use Vertex AI** — Ensure your AI client is initialized with `vertexai: true`. This ensures requests are billed to your Google Cloud credits.
 
-The SDK automatically detects the mounted credentials.
-
-Use Vertex AI
-
-Ensure your AI client is initialized with Vertex AI enabled:
-
-vertexai: true
-
-This ensures requests are billed to your Google Cloud credits.
-
-Project ID
-
-If the SDK cannot detect your project automatically, add the environment variable:
-
--e GOOGLE_CLOUD_PROJECT=your-project-id
+- **Project ID** — If the SDK cannot detect your project automatically, add `-e GOOGLE_CLOUD_PROJECT=your-project-id`.
 
 #### Example:
 
-```docker run -it \
+```bash
+docker run -it \
   -p 8080:8080 \
   -v "$HOME/.config/gcloud:/root/.config/gcloud" \
   -e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
   -e GOOGLE_CLOUD_PROJECT=your-project-id \
   your-image-name
+```
