@@ -4,7 +4,7 @@
 
 Most startups don't die from bad luck. They die from the same silent killers — wrong market, wrong timing, wrong assumptions — that nobody caught early enough. **Startup Autopsy** gives founders a mirror to look into the future.
 
-Video Link
+Video Link: [https://drive.google.com/file/d/1HCjj941-zbRX7_gjPIvyRWXkDKIga3aY/view?usp=sharing]
 
 ---
 
