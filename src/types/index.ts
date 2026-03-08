@@ -19,3 +19,15 @@ export interface Assumption {
   statement: string
   riskLevel: RiskLevel
 }
+
+export interface FailureScenario {
+  title: string
+  rootCause: string
+  severity: 'catastrophic' | 'severe' | 'moderate'
+  failureType: 'market' | 'execution' | 'competition' | 'financial' | 'team'
+  timeline: { month: number; headline: string; description: string }[]
+  earlyWarnings: string[]
+  quote: { text: string; attribution: string }
+  pivotSuggestion: string
+  validationStep: string
+}

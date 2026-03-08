@@ -4,11 +4,13 @@ import PdfUpload from './components/PdfUpload'
 import ImageUpload from './components/ImageUpload'
 import ProfileCard from './components/ProfileCard'
 import AssumptionList from './components/AssumptionList'
+import ScenarioList from './components/ScenarioList'
 import { extractStartupProfile } from './services/extractProfile'
 import { extractAssumptions } from './services/extractAssumptions'
-import type { StartupProfile, Assumption } from './types'
+import { generateFailureScenarios } from './services/generateScenarios'
+import type { StartupProfile, Assumption, FailureScenario } from './types'
 
-type Step = 'input' | 'profile' | 'assumptions' | 'scenarios'
+type Step = 'input' | 'profile' | 'assumptions' | 'results'
 
 function App() {
   const [textInput, setTextInput] = useState('')
@@ -16,8 +18,10 @@ function App() {
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [profile, setProfile] = useState<StartupProfile | null>(null)
   const [assumptions, setAssumptions] = useState<Assumption[]>([])
+  const [scenarios, setScenarios] = useState<FailureScenario[]>([])
   const [isExtracting, setIsExtracting] = useState(false)
   const [isExtractingAssumptions, setIsExtractingAssumptions] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
   const [step, setStep] = useState<Step>('input')
 
   const canSubmit =
@@ -49,6 +53,21 @@ function App() {
       alert('Failed to extract assumptions. Please try again.')
     } finally {
       setIsExtractingAssumptions(false)
+    }
+  }
+
+  async function handleGenerateScenarios() {
+    if (!profile) return
+    setIsGenerating(true)
+    try {
+      const result = await generateFailureScenarios(profile, assumptions)
+      setScenarios(result)
+      setStep('results')
+    } catch (err) {
+      console.error('Scenario generation failed:', err)
+      alert('Failed to generate failure scenarios. Please try again.')
+    } finally {
+      setIsGenerating(false)
     }
   }
 
@@ -115,23 +134,21 @@ function App() {
             />
             <button
               type="button"
-              onClick={() => setStep('scenarios')}
-              disabled={assumptions.length < 3}
+              onClick={handleGenerateScenarios}
+              disabled={assumptions.length < 3 || isGenerating}
               className={`w-full py-3 rounded-lg font-bold text-sm transition-colors
-                ${assumptions.length >= 3
+                ${assumptions.length >= 3 && !isGenerating
                   ? 'bg-red-600 hover:bg-red-500 text-white cursor-pointer'
                   : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                 }`}
             >
-              Generate Failure Scenarios
+              {isGenerating ? 'Generating scenarios...' : 'Generate Failure Scenarios'}
             </button>
           </div>
         )}
 
-        {step === 'scenarios' && (
-          <div className="w-full max-w-2xl flex items-center justify-center py-24">
-            <p className="text-gray-500 text-sm">Failure scenarios coming soon...</p>
-          </div>
+        {step === 'results' && (
+          <ScenarioList scenarios={scenarios} />
         )}
       </main>
     </div>
