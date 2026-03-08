@@ -1,6 +1,6 @@
 import type { StartupProfile, Assumption, FailureScenario } from '../types'
 
-const BASE_URL = 'http://localhost:3001'
+const BASE_URL = ''
 
 async function parseResponse<T>(res: Response): Promise<T> {
   const data = await res.json()
