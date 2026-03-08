@@ -1,20 +1,17 @@
-// Load .env if present (local development — Node 20.12+ built-in)
-try { (process as never as { loadEnvFile(p: string): void }).loadEnvFile('.env') } catch { /* no .env, fine */ }
-
 import express, { type Request, type Response, type NextFunction } from 'express'
 import cors from 'cors'
 import multer from 'multer'
 import crypto from 'node:crypto'
-import { GoogleGenerativeAI, type Part } from '@google/generative-ai'
+import { VertexAI, type Part } from '@google-cloud/vertexai'
 import { logger } from './logger.js'
 import { metrics } from './metrics.js'
 
 const app = express()
 const PORT = process.env.PORT ?? '8080'
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? ''
-if (!GEMINI_API_KEY) logger.warn('server:no-api-key', { hint: 'Set GEMINI_API_KEY env var' })
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
+const VERTEX_PROJECT = process.env.VERTEX_PROJECT ?? 'gen-lang-client-0879782082'
+const VERTEX_LOCATION = process.env.VERTEX_LOCATION ?? 'us-central1'
+const genAI = new VertexAI({ project: VERTEX_PROJECT, location: VERTEX_LOCATION })
 
 const upload = multer({ storage: multer.memoryStorage() })
 
@@ -71,8 +68,10 @@ function sendError(res: Response, err: unknown, fallbackMessage: string) {
   }
 }
 
-function responseText(response: { text(): string }): string {
-  return response.text()
+// @google-cloud/vertexai responses don't have a .text() helper —
+// extract text by joining all text parts from the first candidate.
+function responseText(response: { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }): string {
+  return response.candidates?.[0]?.content?.parts?.map(p => p.text ?? '').join('') ?? ''
 }
 
 async function callGemini<T>(
