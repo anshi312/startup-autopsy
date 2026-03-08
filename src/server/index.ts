@@ -281,19 +281,31 @@ type FailureScenario = {
 
 async function serverGenerateImage(scenario: FailureScenario, reqId: string): Promise<string | null> {
   try {
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
-      generationConfig: { responseModalities: ['IMAGE', 'TEXT'] } as never,
+    const imageModel = genAI.preview.getImageGenerationModel({
+      model: 'imagen-3.0-fast-generate-001',
     })
-    const prompt = `Generate a dark, cinematic, editorial-style documentary photograph representing this startup failure: ${scenario.title}. Context: ${scenario.rootCause}. Style: dramatic lighting, moody, photojournalistic.`
-    const result = await callGemini(reqId, 'scenario-image', () => model.generateContent(prompt))
-    for (const part of result.response.candidates?.[0]?.content?.parts ?? []) {
-      const p = part as { inlineData?: { mimeType: string; data: string } }
-      if (p.inlineData) return `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`
+
+    const prompt = `Cinematic documentary photograph: ${scenario.title}. ${scenario.rootCause}. Dramatic moody lighting, photojournalistic editorial style, dark atmospheric mood.`
+
+    const result = await callGemini(reqId, 'scenario-image', () =>
+      imageModel.generateImages({
+        prompt,
+        numberOfImages: 1,
+        aspectRatio: '16:9',
+      })
+    )
+
+    if (result.images && result.images.length > 0 && result.images[0].imageBytes) {
+      return `data:image/png;base64,${result.images[0].imageBytes}`
     }
-    logger.warn('scenario-image:no-image-part', { reqId })
+
+    logger.warn('scenario-image:no-image', { reqId })
     return null
-  } catch {
+  } catch (err) {
+    logger.error('scenario-image:error', {
+      reqId,
+      error: err instanceof Error ? err.message : String(err),
+    })
     return null
   }
 }
