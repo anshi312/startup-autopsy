@@ -4,7 +4,7 @@
 
 Most startups don't die from bad luck. They die from the same silent killers — wrong market, wrong timing, wrong assumptions — that nobody caught early enough. **Startup Autopsy** gives founders a mirror to look into the future.
 
-Video Link
+Video Link: [https://drive.google.com/file/d/1HCjj941-zbRX7_gjPIvyRWXkDKIga3aY/view?usp=sharing]
 
 ---
 
@@ -147,4 +147,38 @@ docker run -it `
   -p 8080:8080 \
   -v "$HOME/.config/gcloud:/root/.config/gcloud" \
   -e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
+  your-image-name
+
+### Key Rules
+
+---
+
+- No API Key
+
+``` Do not use:
+process.env.GEMINI_API_KEY
+
+The SDK automatically detects the mounted credentials.
+
+Use Vertex AI
+
+Ensure your AI client is initialized with Vertex AI enabled:
+
+vertexai: true
+
+This ensures requests are billed to your Google Cloud credits.
+
+Project ID
+
+If the SDK cannot detect your project automatically, add the environment variable:
+
+-e GOOGLE_CLOUD_PROJECT=your-project-id
+
+#### Example:
+
+```docker run -it \
+  -p 8080:8080 \
+  -v "$HOME/.config/gcloud:/root/.config/gcloud" \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
+  -e GOOGLE_CLOUD_PROJECT=your-project-id \
   your-image-name
