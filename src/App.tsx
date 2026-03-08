@@ -94,12 +94,31 @@ function App() {
     }
   }
 
+  function handleReset() {
+    setTextInput('')
+    setPdfFile(null)
+    setImageFiles([])
+    setProfile(null)
+    setAssumptions([])
+    setScenarios([])
+    setScenarioImages([])
+    setScenarioNarrations([])
+    setError(null)
+    setShowSummary(false)
+    setActiveScenario(0)
+    setStep('input')
+  }
+
   return (
     <div className="min-h-screen bg-[#F9F8F5] text-zinc-900 flex flex-col">
       <nav className="bg-white border-b border-zinc-200 px-6 py-4 flex items-center">
-        <h1 className="font-serif text-xl tracking-tight text-zinc-900">
+        <button
+          type="button"
+          onClick={handleReset}
+          className="font-serif text-xl tracking-tight text-zinc-900 hover:text-red-600 transition-colors cursor-pointer bg-transparent border-none p-0"
+        >
           Startup Autopsy
-        </h1>
+        </button>
       </nav>
 
       <main className="flex-1 flex items-start justify-center px-4 py-12">
@@ -139,18 +158,37 @@ function App() {
               <p className="text-sm text-zinc-500">Review and refine what we extracted before generating assumptions.</p>
             </div>
             <ProfileCard profile={profile} onUpdate={setProfile} />
-            <button
-              type="button"
-              onClick={handleContinue}
-              disabled={isExtractingAssumptions}
-              className={`w-full py-3 rounded-lg font-semibold text-sm transition-colors
-                ${isExtractingAssumptions
-                  ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-                  : 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
-                }`}
-            >
-              {isExtractingAssumptions ? 'Analyzing assumptions…' : 'Continue →'}
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setStep('input')}
+                className="flex-1 py-3 rounded-lg font-semibold text-sm transition-colors bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 cursor-pointer"
+              >
+                ← Back
+              </button>
+              {assumptions.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setStep('assumptions')}
+                  className="flex-1 py-3 rounded-lg font-semibold text-sm transition-colors bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 cursor-pointer"
+                >
+                  Next →
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleContinue}
+                  disabled={isExtractingAssumptions}
+                  className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-colors
+                    ${isExtractingAssumptions
+                      ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                      : 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
+                    }`}
+                >
+                  {isExtractingAssumptions ? 'Analyzing assumptions…' : 'Continue →'}
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -172,18 +210,37 @@ function App() {
                 setAssumptions(prev => [...prev, assumption])
               }
             />
-            <button
-              type="button"
-              onClick={handleGenerateScenarios}
-              disabled={assumptions.length < 3 || isGenerating}
-              className={`w-full py-3 rounded-lg font-semibold text-sm transition-colors
-                ${assumptions.length >= 3 && !isGenerating
-                  ? 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
-                  : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-                }`}
-            >
-              {isGenerating ? 'Generating scenarios…' : 'Generate Failure Scenarios'}
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setStep('profile')}
+                className="flex-1 py-3 rounded-lg font-semibold text-sm transition-colors bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 cursor-pointer"
+              >
+                ← Back
+              </button>
+              {scenarios.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setStep('results')}
+                  className="flex-1 py-3 rounded-lg font-semibold text-sm transition-colors bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 cursor-pointer"
+                >
+                  Next →
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleGenerateScenarios}
+                  disabled={assumptions.length < 3 || isGenerating}
+                  className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-colors
+                    ${assumptions.length >= 3 && !isGenerating
+                      ? 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
+                      : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                    }`}
+                >
+                  {isGenerating ? 'Generating scenarios…' : 'Generate Failure Scenarios'}
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -213,13 +270,22 @@ function App() {
                     narration={scenarioNarrations[activeScenario]}
                   />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowSummary(true)}
-                  className="w-full py-3 rounded-lg font-semibold text-sm bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 transition-colors cursor-pointer shadow-sm"
-                >
-                  View Full Action Plan →
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStep('assumptions')}
+                    className="flex-1 py-3 rounded-lg font-semibold text-sm bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 transition-colors cursor-pointer shadow-sm"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowSummary(true)}
+                    className="flex-1 py-3 rounded-lg font-semibold text-sm bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 transition-colors cursor-pointer shadow-sm"
+                  >
+                    View Full Action Plan →
+                  </button>
+                </div>
               </>
             )}
           </div>
