@@ -4,14 +4,14 @@ interface Props {
 
 export default function PullQuote({ quote }: Props) {
   return (
-    <div className="bg-gray-800 border-l-4 border-red-500 pl-6 pr-5 py-5 rounded-r-lg">
-      <span className="block text-4xl sm:text-6xl text-white opacity-30 leading-none -mb-4 font-serif">
+    <div className="bg-white border border-zinc-200 border-l-4 border-l-red-500 pl-6 pr-5 py-5 rounded-r-lg shadow-sm">
+      <span className="block text-4xl sm:text-6xl text-red-200 leading-none -mb-4 font-serif">
         &ldquo;
       </span>
-      <p className="font-serif text-lg italic text-gray-200 leading-relaxed">
+      <p className="font-serif text-lg italic text-zinc-700 leading-relaxed">
         {quote.text}
       </p>
-      <p className="mt-3 text-sm text-gray-400 text-right">
+      <p className="mt-3 text-sm text-zinc-400 text-right">
         &mdash; {quote.attribution}
       </p>
     </div>

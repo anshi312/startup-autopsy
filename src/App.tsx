@@ -95,21 +95,30 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
-      <nav className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-        <h1 className="text-xl font-bold tracking-tight">
-          💀 Startup Autopsy
+    <div className="min-h-screen bg-[#F9F8F5] text-zinc-900 flex flex-col">
+      <nav className="bg-white border-b border-zinc-200 px-6 py-4 flex items-center gap-3">
+        <div className="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center shrink-0">
+          <svg viewBox="0 0 16 16" fill="white" className="w-3.5 h-3.5">
+            <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 3.75a.75.75 0 00-1.5 0v4l2.5 1.5a.75.75 0 00.75-1.3L8.75 7.6V4.75z"/>
+          </svg>
+        </div>
+        <h1 className="font-serif text-xl tracking-tight text-zinc-900">
+          Startup Autopsy
         </h1>
       </nav>
 
       <main className="flex-1 flex items-start justify-center px-4 py-12">
         {step === 'input' && (
-          <div className="w-full max-w-2xl flex flex-col gap-6">
+          <div className="w-full max-w-2xl flex flex-col gap-5">
+            <div className="mb-2">
+              <h2 className="font-serif text-3xl text-zinc-900 mb-1">Diagnose your startup</h2>
+              <p className="text-sm text-zinc-500">Describe your idea and we'll surface the failure scenarios you haven't considered yet.</p>
+            </div>
             <TextInput value={textInput} onChange={setTextInput} />
             <PdfUpload onChange={setPdfFile} />
             <ImageUpload onChange={setImageFiles} />
             {error && (
-              <div className="rounded-lg bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
+              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -117,37 +126,45 @@ function App() {
               type="button"
               onClick={handleSubmit}
               disabled={!canSubmit}
-              className={`w-full py-3 rounded-lg font-bold text-sm transition-colors
+              className={`w-full py-3 rounded-lg font-semibold text-sm transition-colors
                 ${canSubmit
-                  ? 'bg-red-600 hover:bg-red-500 text-white cursor-pointer'
-                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  ? 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
+                  : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
                 }`}
             >
-              {isExtracting ? 'Analyzing...' : 'Run Autopsy'}
+              {isExtracting ? 'Analyzing…' : 'Run Autopsy'}
             </button>
           </div>
         )}
 
         {step === 'profile' && profile && (
           <div className="w-full max-w-2xl flex flex-col gap-4">
+            <div className="mb-1">
+              <h2 className="font-serif text-3xl text-zinc-900 mb-1">Startup Profile</h2>
+              <p className="text-sm text-zinc-500">Review and refine what we extracted before generating assumptions.</p>
+            </div>
             <ProfileCard profile={profile} onUpdate={setProfile} />
             <button
               type="button"
               onClick={handleContinue}
               disabled={isExtractingAssumptions}
-              className={`w-full py-3 rounded-lg font-bold text-sm transition-colors
+              className={`w-full py-3 rounded-lg font-semibold text-sm transition-colors
                 ${isExtractingAssumptions
-                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                  : 'bg-red-600 hover:bg-red-500 text-white cursor-pointer'
+                  ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                  : 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
                 }`}
             >
-              {isExtractingAssumptions ? 'Analyzing assumptions...' : 'Continue →'}
+              {isExtractingAssumptions ? 'Analyzing assumptions…' : 'Continue →'}
             </button>
           </div>
         )}
 
         {step === 'assumptions' && (
           <div className="w-full max-w-2xl flex flex-col gap-4">
+            <div className="mb-1">
+              <h2 className="font-serif text-3xl text-zinc-900 mb-1">Key Assumptions</h2>
+              <p className="text-sm text-zinc-500">These are the bets your startup is making. Edit, add, or remove before generating failure scenarios.</p>
+            </div>
             <AssumptionList
               assumptions={assumptions}
               onUpdate={(id, updated) =>
@@ -164,13 +181,13 @@ function App() {
               type="button"
               onClick={handleGenerateScenarios}
               disabled={assumptions.length < 3 || isGenerating}
-              className={`w-full py-3 rounded-lg font-bold text-sm transition-colors
+              className={`w-full py-3 rounded-lg font-semibold text-sm transition-colors
                 ${assumptions.length >= 3 && !isGenerating
-                  ? 'bg-red-600 hover:bg-red-500 text-white cursor-pointer'
-                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  ? 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
+                  : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
                 }`}
             >
-              {isGenerating ? 'Generating scenarios...' : 'Generate Failure Scenarios'}
+              {isGenerating ? 'Generating scenarios…' : 'Generate Failure Scenarios'}
             </button>
           </div>
         )}
@@ -178,8 +195,8 @@ function App() {
         {step === 'results' && scenarios.length > 0 && (
           <div className="w-full max-w-4xl flex flex-col gap-4">
             {(isGeneratingImages || isGeneratingNarrations) && (
-              <p className="text-center text-gray-400 text-sm animate-pulse">
-                Generating documentary visuals...
+              <p className="text-center text-zinc-400 text-sm animate-pulse">
+                Generating documentary visuals…
               </p>
             )}
             {showSummary ? (
@@ -189,7 +206,7 @@ function App() {
               />
             ) : (
               <>
-                <div className="bg-gray-800 rounded-xl overflow-hidden">
+                <div className="bg-white rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
                   <ScenarioTabs
                     scenarios={scenarios}
                     activeIndex={activeScenario}
@@ -204,7 +221,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setShowSummary(true)}
-                  className="w-full py-3 rounded-lg font-bold text-sm bg-gray-700 hover:bg-gray-600 text-white transition-colors cursor-pointer"
+                  className="w-full py-3 rounded-lg font-semibold text-sm bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 transition-colors cursor-pointer shadow-sm"
                 >
                   View Full Action Plan →
                 </button>

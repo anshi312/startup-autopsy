@@ -4,15 +4,15 @@ import type { FailureScenario } from '../types'
 const SEVERITY_COLORS: Record<FailureScenario['severity'], string> = {
   catastrophic: 'bg-red-600 text-white',
   severe: 'bg-orange-500 text-white',
-  moderate: 'bg-yellow-500 text-black',
+  moderate: 'bg-amber-400 text-amber-900',
 }
 
 const FAILURE_TYPE_COLORS: Record<FailureScenario['failureType'], string> = {
-  market: 'bg-blue-800 text-blue-200',
-  execution: 'bg-purple-800 text-purple-200',
-  competition: 'bg-cyan-800 text-cyan-200',
-  financial: 'bg-emerald-800 text-emerald-200',
-  team: 'bg-pink-800 text-pink-200',
+  market: 'bg-blue-100 text-blue-700',
+  execution: 'bg-violet-100 text-violet-700',
+  competition: 'bg-cyan-100 text-cyan-700',
+  financial: 'bg-emerald-100 text-emerald-700',
+  team: 'bg-pink-100 text-pink-700',
 }
 
 interface Props {
@@ -58,9 +58,9 @@ export default function ScenarioHeader({ scenario, imageUrl }: Props) {
   }
 
   return (
-    <div className="bg-gray-800 px-4 sm:px-6 py-5">
+    <div className="bg-[#F9F8F5] border-b border-zinc-200 px-4 sm:px-6 py-5">
       {badges}
-      <h2 className="mt-2 text-xl sm:text-2xl font-bold text-white leading-snug">
+      <h2 className="mt-2 font-serif text-xl sm:text-2xl text-zinc-900 leading-snug">
         {scenario.title}
       </h2>
     </div>
