@@ -105,3 +105,46 @@ npm install
 
 # Start the dev server
 npm run dev
+
+## Vertex AI Authentication (Docker Setup)
+
+This project uses **Google Vertex AI with Application Default Credentials (ADC)**.  
+Instead of API keys, the container uses your local Google Cloud authentication.
+
+---
+
+### 1. Host Setup (One-time)
+
+Run these commands **on your computer (not inside Docker)** to generate the credentials file.
+
+| Action | Windows (PowerShell) | Mac (Terminal) |
+|------|------|------|
+| Login | `gcloud init` | `gcloud init` |
+| Generate Credentials | `gcloud auth application-default login` | `gcloud auth application-default login` |
+| Verify File | `Test-Path "${env:APPDATA}\gcloud\application_default_credentials.json"` | `ls ~/.config/gcloud/application_default_credentials.json` |
+
+This creates the **Application Default Credentials file** used by Vertex AI.
+
+---
+
+### 2. Run Docker Container
+
+Mount the Google Cloud credentials directory into the container.
+
+#### Windows (PowerShell)
+
+```powershell
+docker run -it `
+  -p 8080:8080 `
+  -v "${env:APPDATA}\gcloud:/root/.config/gcloud" `
+  -e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json `
+  your-image-name
+
+
+#### Mac / Linux / Unix based system
+
+``` docker run -it \
+  -p 8080:8080 \
+  -v "$HOME/.config/gcloud:/root/.config/gcloud" \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
+  your-image-name
