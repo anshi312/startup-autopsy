@@ -3,17 +3,21 @@ import TextInput from './components/TextInput'
 import PdfUpload from './components/PdfUpload'
 import ImageUpload from './components/ImageUpload'
 import ProfileCard from './components/ProfileCard'
+import AssumptionList from './components/AssumptionList'
 import { extractStartupProfile } from './services/extractProfile'
-import type { StartupProfile } from './types'
+import { extractAssumptions } from './services/extractAssumptions'
+import type { StartupProfile, Assumption } from './types'
 
-type Step = 'input' | 'profile' | 'assumptions'
+type Step = 'input' | 'profile' | 'assumptions' | 'scenarios'
 
 function App() {
   const [textInput, setTextInput] = useState('')
   const [pdfFile, setPdfFile] = useState<File | null>(null)
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [profile, setProfile] = useState<StartupProfile | null>(null)
+  const [assumptions, setAssumptions] = useState<Assumption[]>([])
   const [isExtracting, setIsExtracting] = useState(false)
+  const [isExtractingAssumptions, setIsExtractingAssumptions] = useState(false)
   const [step, setStep] = useState<Step>('input')
 
   const canSubmit =
@@ -30,6 +34,21 @@ function App() {
       console.error('Autopsy failed:', err)
     } finally {
       setIsExtracting(false)
+    }
+  }
+
+  async function handleContinue() {
+    if (!profile) return
+    setIsExtractingAssumptions(true)
+    try {
+      const result = await extractAssumptions(profile)
+      setAssumptions(result)
+      setStep('assumptions')
+    } catch (err) {
+      console.error('Assumptions extraction failed:', err)
+      alert('Failed to extract assumptions. Please try again.')
+    } finally {
+      setIsExtractingAssumptions(false)
     }
   }
 
@@ -67,17 +86,51 @@ function App() {
             <ProfileCard profile={profile} onUpdate={setProfile} />
             <button
               type="button"
-              onClick={() => setStep('assumptions')}
-              className="w-full py-3 rounded-lg font-bold text-sm bg-red-600 hover:bg-red-500 text-white transition-colors"
+              onClick={handleContinue}
+              disabled={isExtractingAssumptions}
+              className={`w-full py-3 rounded-lg font-bold text-sm transition-colors
+                ${isExtractingAssumptions
+                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  : 'bg-red-600 hover:bg-red-500 text-white cursor-pointer'
+                }`}
             >
-              Continue →
+              {isExtractingAssumptions ? 'Analyzing assumptions...' : 'Continue →'}
             </button>
           </div>
         )}
 
         {step === 'assumptions' && (
+          <div className="w-full max-w-2xl flex flex-col gap-4">
+            <AssumptionList
+              assumptions={assumptions}
+              onUpdate={(id, updated) =>
+                setAssumptions(prev => prev.map(a => a.id === id ? updated : a))
+              }
+              onRemove={id =>
+                setAssumptions(prev => prev.filter(a => a.id !== id))
+              }
+              onAdd={assumption =>
+                setAssumptions(prev => [...prev, assumption])
+              }
+            />
+            <button
+              type="button"
+              onClick={() => setStep('scenarios')}
+              disabled={assumptions.length < 3}
+              className={`w-full py-3 rounded-lg font-bold text-sm transition-colors
+                ${assumptions.length >= 3
+                  ? 'bg-red-600 hover:bg-red-500 text-white cursor-pointer'
+                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                }`}
+            >
+              Generate Failure Scenarios
+            </button>
+          </div>
+        )}
+
+        {step === 'scenarios' && (
           <div className="w-full max-w-2xl flex items-center justify-center py-24">
-            <p className="text-gray-500 text-sm">Assumptions step coming soon...</p>
+            <p className="text-gray-500 text-sm">Failure scenarios coming soon...</p>
           </div>
         )}
       </main>
